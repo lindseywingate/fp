@@ -49,6 +49,12 @@ public class ImageDisplay {
 
 			long sizeOfFile = rgbFile.length();
 			System.out.println("size of file length "+sizeOfFile);
+			frame = new JFrame();
+			//JFrame frame = new JFrame(getClass().getSimpleName());
+			frame.add(new JLabel(new ImageIcon(img)));
+			frame.setLocationRelativeTo(null);
+			frame.pack();
+			frame.setVisible(true);
 			for(long k = 0; k<sizeOfFile; k += frameLength) {
 				raf.seek(k);
 				raf.read(bytes);
@@ -70,8 +76,13 @@ public class ImageDisplay {
 						//System.out.println("INDEX "+ind); //262144
 					}
 				}
+				frame.getContentPane().removeAll();
+				frame.add(new JLabel(new ImageIcon(img)));
+				frame.invalidate();
+				frame.validate();
+				frame.repaint();
 				//add image to the array
-				frames.add(deepCopy(img));
+				//frames.add(deepCopy(img));
 				//clear image? and start a new one
 			}
 		}
@@ -92,23 +103,25 @@ public class ImageDisplay {
 		//System.out.println("The second parameter was: " + param1);
 
 		// Read in the specified image
+		File file = new File(".");
+		for(String fileNames : file.list()) System.out.println(fileNames);
 		imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		readImageRGB(width, height, args[0], imgOne);
 
-		frame = new JFrame();
-		//JFrame frame = new JFrame(getClass().getSimpleName());
-		frame.add(new JLabel(new ImageIcon(imgOne)));
-		frame.setLocationRelativeTo(null);
-		frame.pack();
-		frame.setVisible(true);
-
-		for(int n=0; n<frames.size(); n++) {
-			frame.getContentPane().removeAll();
-			frame.add(new JLabel(new ImageIcon(frames.get(n))));
-			frame.invalidate();
-			frame.validate();
-			frame.repaint();	
-		}
+//		frame = new JFrame();
+//		//JFrame frame = new JFrame(getClass().getSimpleName());
+//		frame.add(new JLabel(new ImageIcon(imgOne)));
+//		frame.setLocationRelativeTo(null);
+//		frame.pack();
+//		frame.setVisible(true);
+//
+//		for(int n=0; n<frames.size(); n++) {
+//			frame.getContentPane().removeAll();
+//			frame.add(new JLabel(new ImageIcon(frames.get(n))));
+//			frame.invalidate();
+//			frame.validate();
+//			frame.repaint();
+//		}
 		// Use label to display the image
 		// GridBagLayout gLayout = new GridBagLayout();
 		// frame.getContentPane().setLayout(gLayout);
