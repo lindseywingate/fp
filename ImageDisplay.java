@@ -55,6 +55,7 @@ public class ImageDisplay {
 			frame.setLocationRelativeTo(null);
 			frame.pack();
 			frame.setVisible(true);
+			long startTime = System.nanoTime();
 			for(long k = 0; k<sizeOfFile; k += frameLength) {
 				raf.seek(k);
 				raf.read(bytes);
@@ -81,16 +82,24 @@ public class ImageDisplay {
 				frame.invalidate();
 				frame.validate();
 				frame.repaint();
+				Thread.sleep(18);
 				//add image to the array
 				//frames.add(deepCopy(img));
 				//clear image? and start a new one
 			}
+			long endTime = System.nanoTime();
+			long timeElapsed = endTime - startTime;
+			System.out.println("Execution time in nanoseconds: " + timeElapsed);
+			System.out.println("Execution time in milliseconds: " + timeElapsed / 1000000);
+//			long totMin = 300;
+//			long diff = totMin/(timeElapsed/1000);
+//			System.out.println(diff);
 		}
 		catch (FileNotFoundException e) 
 		{
 			e.printStackTrace();
 		} 
-		catch (IOException e) 
+		catch (IOException | InterruptedException e)
 		{
 			e.printStackTrace();
 		}
