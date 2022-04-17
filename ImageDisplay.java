@@ -25,41 +25,44 @@ public class ImageDisplay {
 			//three bytes per pixel.
 			int frameLength = width*height*3;
 
-			File file = new File(imgPath);
+			File rgbFile = new File(imgPath);
 			StringBuffer buffer = new StringBuffer();
-			RandomAccessFile raf = new RandomAccessFile(file, "rw");
+			RandomAccessFile raf = new RandomAccessFile(rgbFile, "rw");
 
-			raf.seek(0);
+			int i = 0;
+			// //counter for the pointer position
+			// raf.seek(0);
 			long len = frameLength;
-			//creates byte array for pixels to be stored
+			// //creates byte array for pixels to be stored
 			byte[] bytes = new byte[(int) len];
-			//reads bytes into the raf buffer
-			raf.read(bytes);
+			// //reads bytes into the raf buffer
+			// raf.read(bytes);
 
-			//int testByte = raf.read();
-			//long length = raf.length();
-			
-			//System.out.println("length "+length);
-			//System.out.println("byte "+testByte);
+			long sizeOfFile = rgbFile.length();
+			System.out.println("size of file length "+sizeOfFile);
+			for(int k = 0; k<sizeOfFile; k += frameLength) {
+				raf.seek(k);
+				raf.read(bytes);
 
-			//how do we find the number of frames in the video to split up the pixels?
-			int ind = 0;
-			for(int y = 0; y < height; y++)
-			{
-				for(int x = 0; x < width; x++)
+				int ind = 0;
+				for(int y = 0; y < height; y++)
 				{
-					byte a = 0;
-					byte r = bytes[ind];
-					byte g = bytes[ind+height*width];
-					byte b = bytes[ind+height*width*2]; 
-
-					int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
-					System.out.println("PIXEL "+pix);
-					//int pix = ((a << 24) + (r << 16) + (g << 8) + b);
-					img.setRGB(x,y,pix);
-					ind++;
-					//System.out.println("INDEX "+ind); //262144
+					for(int x = 0; x < width; x++)
+					{
+						byte a = 0;
+						byte r = bytes[ind];
+						byte g = bytes[ind+height*width];
+						byte b = bytes[ind+height*width*2]; 
+	
+						int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
+						//int pix = ((a << 24) + (r << 16) + (g << 8) + b);
+						img.setRGB(x,y,pix);
+						ind++;
+						//System.out.println("INDEX "+ind); //262144
+					}
 				}
+				//add image to the array
+				//clear image? and start a new one
 			}
 		}
 		catch (FileNotFoundException e) 
