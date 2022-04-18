@@ -4,6 +4,7 @@ import java.awt.image.*;
 import java.io.*;
 import javax.swing.*;
 import java.util.ArrayList;
+import  org.wikijava.sound.playWave.*;
 
 public class ImageDisplay {
 
@@ -155,7 +156,9 @@ public class ImageDisplay {
 
 	public static void main(String[] args) {
 		ImageDisplay ren = new ImageDisplay();
+
 		ren.showIms(args);
+		//PlayWaveFile.main(args);
 	}
 
 }
