@@ -1,9 +1,13 @@
 
-import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import javax.swing.*;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import  org.wikijava.sound.playWave.*;
 
 public class ImageDisplay {
@@ -113,10 +117,11 @@ public class ImageDisplay {
 		//System.out.println("The second parameter was: " + param1);
 
 		// Read in the specified image
-		File file = new File(".");
-		for(String fileNames : file.list()) System.out.println(fileNames);
+		//File file = new File(".");
+		//for(String fileNames : file.list()) System.out.println(fileNames);
 		imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		readImageRGB(width, height, args[0], imgOne);
+
 
 //		frame = new JFrame();
 //		//JFrame frame = new JFrame(getClass().getSimpleName());
@@ -154,10 +159,32 @@ public class ImageDisplay {
 
 	}
 
-	public static void main(String[] args) {
-		ImageDisplay ren = new ImageDisplay();
+	public static void main(String[] args) throws InterruptedException {
+		Callable<Void> callable1 = new Callable<Void>()
+		{
+			@Override
+			public Void call() throws Exception
+			{
+				ImageDisplay ren = new ImageDisplay();
 
-		ren.showIms(args);
+				ren.showIms(args);;
+				return null;
+			}
+		};
+		Callable<Void> callable2 = new Callable<Void>()
+		{
+			@Override
+			public Void call() throws Exception
+			{
+				PlayWaveFile.main(args);
+				return null;
+			}
+		};
+		List<Callable<Void>> taskList = new ArrayList<>();
+		taskList.add(callable1);
+		taskList.add(callable2);
+		ExecutorService executor = Executors.newFixedThreadPool(3);
+		executor.invokeAll(taskList);
 		//PlayWaveFile.main(args);
 	}
 
