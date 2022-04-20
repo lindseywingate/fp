@@ -54,17 +54,17 @@ public class ImageDisplay {
 
 			long sizeOfFile = rgbFile.length();
 			System.out.println("size of file length "+sizeOfFile);
-			frame = new JFrame();
-			//JFrame frame = new JFrame(getClass().getSimpleName());
-			frame.add(new JLabel(new ImageIcon(img)));
-			frame.setLocationRelativeTo(null);
-			frame.pack();
-			frame.setVisible(true);
+//			frame = new JFrame();
+//			//JFrame frame = new JFrame(getClass().getSimpleName());
+//			frame.add(new JLabel(new ImageIcon(img)));
+//			frame.setLocationRelativeTo(null);
+//			frame.pack();
+//			frame.setVisible(true);
 			long startTime = System.nanoTime();
 			for(long k = 0; k<sizeOfFile; k += frameLength) {
 				raf.seek(k);
 				raf.read(bytes);
-
+				img = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
 				int ind = 0;
 				for(int y = 0; y < height; y++)
 				{
@@ -82,14 +82,14 @@ public class ImageDisplay {
 						//System.out.println("INDEX "+ind); //262144
 					}
 				}
-				frame.getContentPane().removeAll();
-				frame.add(new JLabel(new ImageIcon(img)));
-				frame.invalidate();
-				frame.validate();
-				frame.repaint();
-				Thread.sleep(18);
+//				frame.getContentPane().removeAll();
+//				frame.add(new JLabel(new ImageIcon(img)));
+//				frame.invalidate();
+//				frame.validate();
+//				frame.repaint();
+//				Thread.sleep(1);
 				//add image to the array
-				//frames.add(deepCopy(img));
+				frames.add(img);
 				//clear image? and start a new one
 			}
 			long endTime = System.nanoTime();
@@ -104,13 +104,13 @@ public class ImageDisplay {
 		{
 			e.printStackTrace();
 		} 
-		catch (IOException | InterruptedException e)
+		catch (IOException e /*| InterruptedException e*/)
 		{
 			e.printStackTrace();
 		}
 	}
 
-	public void showIms(String[] args){
+	public void showIms(String[] args) throws InterruptedException {
 
 		// Read a parameter from command line
 		//String param1 = args[1];
@@ -123,20 +123,7 @@ public class ImageDisplay {
 		readImageRGB(width, height, args[0], imgOne);
 
 
-//		frame = new JFrame();
-//		//JFrame frame = new JFrame(getClass().getSimpleName());
-//		frame.add(new JLabel(new ImageIcon(imgOne)));
-//		frame.setLocationRelativeTo(null);
-//		frame.pack();
-//		frame.setVisible(true);
-//
-//		for(int n=0; n<frames.size(); n++) {
-//			frame.getContentPane().removeAll();
-//			frame.add(new JLabel(new ImageIcon(frames.get(n))));
-//			frame.invalidate();
-//			frame.validate();
-//			frame.repaint();
-//		}
+
 		// Use label to display the image
 		// GridBagLayout gLayout = new GridBagLayout();
 		// frame.getContentPane().setLayout(gLayout);
@@ -158,16 +145,33 @@ public class ImageDisplay {
 		// frame.pack();
 
 	}
+	public void runFrames() throws InterruptedException {
+		frame = new JFrame();
+		//JFrame frame = new JFrame(getClass().getSimpleName());
+		frame.add(new JLabel(new ImageIcon(imgOne)));
+		frame.setLocationRelativeTo(null);
+		frame.pack();
+		frame.setVisible(true);
+
+		for(int n=0; n<frames.size(); n++) {
+			frame.getContentPane().removeAll();
+			frame.add(new JLabel(new ImageIcon(frames.get(n))));
+			frame.invalidate();
+			frame.validate();
+			frame.repaint();
+			Thread.sleep(33,333333);
+		}
+	}
 
 	public static void main(String[] args) throws InterruptedException {
+		ImageDisplay ren = new ImageDisplay();
+		ren.showIms(args);
 		Callable<Void> callable1 = new Callable<Void>()
 		{
 			@Override
 			public Void call() throws Exception
 			{
-				ImageDisplay ren = new ImageDisplay();
-
-				ren.showIms(args);;
+				ren.runFrames();
 				return null;
 			}
 		};
