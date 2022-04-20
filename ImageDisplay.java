@@ -159,7 +159,7 @@ public class ImageDisplay {
 			frame.invalidate();
 			frame.validate();
 			frame.repaint();
-			Thread.sleep(35);
+			Thread.sleep(33,333333);
 		}
 	}
 
