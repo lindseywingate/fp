@@ -1,9 +1,14 @@
 
-import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import  org.wikijava.sound.playWave.*;
 
 public class ImageDisplay {
 
@@ -12,8 +17,17 @@ public class ImageDisplay {
 	BufferedImage imgOne;
 	int width = 480; // default image width and height
 	int height = 270;
+	ArrayList<BufferedImage> frames = new ArrayList<BufferedImage>();
 
 	//6291456 - bytes in each frame
+	//9000 frames in vieo
+
+	static BufferedImage deepCopy(BufferedImage bi) {
+		ColorModel cm = bi.getColorModel();
+		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+		WritableRaster raster = bi.copyData(null);
+		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+	}
 
 	/** Read Image RGB
 	 *  Reads the image of given width and height at the given imgPath into the provided BufferedImage.
@@ -40,10 +54,17 @@ public class ImageDisplay {
 
 			long sizeOfFile = rgbFile.length();
 			System.out.println("size of file length "+sizeOfFile);
-			for(int k = 0; k<sizeOfFile; k += frameLength) {
+//			frame = new JFrame();
+//			//JFrame frame = new JFrame(getClass().getSimpleName());
+//			frame.add(new JLabel(new ImageIcon(img)));
+//			frame.setLocationRelativeTo(null);
+//			frame.pack();
+//			frame.setVisible(true);
+			long startTime = System.nanoTime();
+			for(long k = 0; k<sizeOfFile; k += frameLength) {
 				raf.seek(k);
 				raf.read(bytes);
-
+				img = new BufferedImage(width,height,BufferedImage.TYPE_INT_RGB);
 				int ind = 0;
 				for(int y = 0; y < height; y++)
 				{
@@ -61,56 +82,114 @@ public class ImageDisplay {
 						//System.out.println("INDEX "+ind); //262144
 					}
 				}
+//				frame.getContentPane().removeAll();
+//				frame.add(new JLabel(new ImageIcon(img)));
+//				frame.invalidate();
+//				frame.validate();
+//				frame.repaint();
+//				Thread.sleep(1);
 				//add image to the array
+				frames.add(img);
 				//clear image? and start a new one
 			}
+			long endTime = System.nanoTime();
+			long timeElapsed = endTime - startTime;
+			System.out.println("Execution time in nanoseconds: " + timeElapsed);
+			System.out.println("Execution time in milliseconds: " + timeElapsed / 1000000);
+//			long totMin = 300;
+//			long diff = totMin/(timeElapsed/1000);
+//			System.out.println(diff);
 		}
 		catch (FileNotFoundException e) 
 		{
 			e.printStackTrace();
 		} 
-		catch (IOException e) 
+		catch (IOException e /*| InterruptedException e*/)
 		{
 			e.printStackTrace();
 		}
 	}
 
-	public void showIms(String[] args){
+	public void showIms(String[] args) throws InterruptedException {
 
 		// Read a parameter from command line
 		//String param1 = args[1];
 		//System.out.println("The second parameter was: " + param1);
 
 		// Read in the specified image
+		//File file = new File(".");
+		//for(String fileNames : file.list()) System.out.println(fileNames);
 		imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		readImageRGB(width, height, args[0], imgOne);
 
+
+
 		// Use label to display the image
+		// GridBagLayout gLayout = new GridBagLayout();
+		// frame.getContentPane().setLayout(gLayout);
+
+		// lbIm1 = new JLabel(new ImageIcon(imgOne));
+
+		// GridBagConstraints c = new GridBagConstraints();
+		// c.fill = GridBagConstraints.HORIZONTAL;
+		// c.anchor = GridBagConstraints.CENTER;
+		// c.weightx = 0.5;
+		// c.gridx = 0;
+		// c.gridy = 0;
+
+		// c.fill = GridBagConstraints.HORIZONTAL;
+		// c.gridx = 0;
+		// c.gridy = 1;
+		// frame.getContentPane().add(lbIm1, c);
+
+		// frame.pack();
+
+	}
+	public void runFrames() throws InterruptedException {
 		frame = new JFrame();
-		GridBagLayout gLayout = new GridBagLayout();
-		frame.getContentPane().setLayout(gLayout);
-
-		lbIm1 = new JLabel(new ImageIcon(imgOne));
-
-		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.anchor = GridBagConstraints.CENTER;
-		c.weightx = 0.5;
-		c.gridx = 0;
-		c.gridy = 0;
-
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.gridx = 0;
-		c.gridy = 1;
-		frame.getContentPane().add(lbIm1, c);
-
+		//JFrame frame = new JFrame(getClass().getSimpleName());
+		frame.add(new JLabel(new ImageIcon(imgOne)));
+		frame.setLocationRelativeTo(null);
 		frame.pack();
 		frame.setVisible(true);
+
+		for(int n=0; n<frames.size(); n++) {
+			frame.getContentPane().removeAll();
+			frame.add(new JLabel(new ImageIcon(frames.get(n))));
+			frame.invalidate();
+			frame.validate();
+			frame.repaint();
+			Thread.sleep(33,333333);
+		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		ImageDisplay ren = new ImageDisplay();
 		ren.showIms(args);
+		Callable<Void> callable1 = new Callable<Void>()
+		{
+			@Override
+			public Void call() throws Exception
+			{
+				ren.runFrames();
+				return null;
+			}
+		};
+		Callable<Void> callable2 = new Callable<Void>()
+		{
+			@Override
+			public Void call() throws Exception
+			{
+				PlayWaveFile.main(args);
+				return null;
+			}
+		};
+		List<Callable<Void>> taskList = new ArrayList<>();
+		taskList.add(callable1);
+		taskList.add(callable2);
+		ExecutorService executor = Executors.newFixedThreadPool(3);
+		executor.invokeAll(taskList);
+		//PlayWaveFile.main(args);
 	}
 
 }
