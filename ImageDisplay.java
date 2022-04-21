@@ -146,6 +146,7 @@ public class ImageDisplay {
 
 	}
 	public void runFrames() throws InterruptedException {
+		System.out.println("video");
 		frame = new JFrame();
 		//JFrame frame = new JFrame(getClass().getSimpleName());
 		frame.add(new JLabel(new ImageIcon(imgOne)));
@@ -159,7 +160,7 @@ public class ImageDisplay {
 			frame.invalidate();
 			frame.validate();
 			frame.repaint();
-			Thread.sleep(33,333333);
+			Thread.sleep(32,333333);
 		}
 	}
 
@@ -172,6 +173,7 @@ public class ImageDisplay {
 			public Void call() throws Exception
 			{
 				ren.runFrames();
+
 				return null;
 			}
 		};
@@ -181,6 +183,7 @@ public class ImageDisplay {
 			public Void call() throws Exception
 			{
 				PlayWaveFile.main(args);
+
 				return null;
 			}
 		};
