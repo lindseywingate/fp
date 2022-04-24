@@ -39,6 +39,8 @@ public class PlaySound {
             //add buffer for mark/reset support, modified by Jian
             InputStream bufferedIn = new BufferedInputStream(this.waveStream);
             audioInputStream = AudioSystem.getAudioInputStream(bufferedIn);
+            long frameLength = audioInputStream.getFrameLength();
+            System.out.println("frame length " + frameLength);
 
         } catch (UnsupportedAudioFileException e1) {
             throw new PlayWaveException(e1);
@@ -48,9 +50,15 @@ public class PlaySound {
 
         // Obtain the information about the AudioInputStream
         AudioFormat audioFormat = audioInputStream.getFormat();
+        System.out.println("audio format"+ audioFormat);
         Info info = new Info(SourceDataLine.class, audioFormat);
         System.out.println("sound data: "+audioFormat.getSampleRate());
         //48kHz, 1 channel, 16 sample size, 2 frame size, 48kHz frame rate
+        ///48000 samples per second
+        //take length in seconds * samples per second to get total samples
+        //https://softwareengineering.stackexchange.com/questions/136215/how-to-determine-frequency-in-hertz-real-time-with-java-sound
+        //FFT/FT
+        //https://www.developer.com/java/fun-with-java-understanding-the-fast-fourier-transform-fft-algorithm/
 
         // opens the audio channel
         SourceDataLine dataLine = null;
@@ -69,21 +77,29 @@ public class PlaySound {
 
         try {
             while (readBytes != -1) {
-                byte largest = 0;
-                for(int n = 0; n<audioBuffer.length; n++) {
-                    System.out.println("BYTE "+audioBuffer[n]);
-                    if(audioBuffer[n] > largest) {
-                        largest = audioBuffer[n];
-                    }
-                }
-                System.out.println("largest "+largest);
-
+                double amplitude = 0;
                 readBytes = audioInputStream.read(audioBuffer, 0,
                         audioBuffer.length);
-                System.out.println("microseconds "+dataLine.getMicrosecondPosition());
-                System.out.println("frame position "+dataLine.getFramePosition());
-                System.out.println("get level "+ dataLine.getLevel());
+                for (int i = 0; i < audioBuffer.length/2; i++) {
+                    double y = (audioBuffer[i*2] | audioBuffer[i*2+1] << 8) / 32768.0;
+                    amplitude += Math.abs(y);
+                }
+                amplitude = amplitude / audioBuffer.length / 2;
+                System.out.println(amplitude);
+                //System.out.println("microseconds "+dataLine.getMicrosecondPosition());
+                //System.out.println("frame position "+dataLine.getFramePosition());
+                //System.out.println("get level "+ dataLine.getLevel());
                 if (readBytes >= 0){
+                    //clone byte array
+                    byte[] clone = audioBuffer.clone();
+                    //System.out.println(audioBuffer[clone.length-1]);
+                    //temp holder for first spot in bytes
+                    byte temp = clone[0];
+                    //end holder for last spot in bytes
+                    byte end = clone[clone.length-1];
+                    //removing section from cloned array
+                    clone[clone.length-1] = temp;
+                    clone[0] = end;
                     dataLine.write(audioBuffer, 0, readBytes);
                 }
             }
