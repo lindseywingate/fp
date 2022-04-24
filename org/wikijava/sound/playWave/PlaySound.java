@@ -3,6 +3,7 @@ package org.wikijava.sound.playWave;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -11,6 +12,7 @@ import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.sound.sampled.DataLine.Info;
+
 
 /**
  * 
@@ -70,7 +72,23 @@ public class PlaySound {
 	    while (readBytes != -1) {
 		readBytes = audioInputStream.read(audioBuffer, 0,
 			audioBuffer.length);
+			double amplitude = 0;
+			for (int i = 0; i < audioBuffer.length/2; i++) {
+				double y = (audioBuffer[i*2] | audioBuffer[i*2+1] << 8) / 32768.0;
+				// depending on your endianness:
+				//double y = (audioBuffer[i*2]<<8 | audioBuffer[i*2+1]) / 32768.0;
+				amplitude += Math.abs(y);
+			}
+			amplitude = amplitude / audioBuffer.length / 2;
+			System.out.println(amplitude);
 		if (readBytes >= 0){
+			byte[] clone = audioBuffer.clone();
+			//Arrays.sort(clone);
+			System.out.println(audioBuffer[clone.length-1]);
+			byte temp = clone[0];
+			byte  end = clone[clone.length-1];
+			clone[clone.length-1] = temp;
+			clone[0] = end;
 		    dataLine.write(audioBuffer, 0, readBytes);
 		}
 	    }
