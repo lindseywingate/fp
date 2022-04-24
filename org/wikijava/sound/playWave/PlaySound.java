@@ -52,12 +52,18 @@ public class PlaySound {
 	// Obtain the information about the AudioInputStream
 	AudioFormat audioFormat = audioInputStream.getFormat();
 	Info info = new Info(SourceDataLine.class, audioFormat);
+	float sample = audioFormat.getSampleRate();
+	int bitDepth = audioFormat.getSampleSizeInBits();
+	int channel = audioFormat.getChannels();
+	int bitRate = (int) sample*bitDepth*channel;
+	int byteRate = bitRate/8;
 
 	// opens the audio channel
 	SourceDataLine dataLine = null;
 	try {
 	    dataLine = (SourceDataLine) AudioSystem.getLine(info);
-	    dataLine.open(audioFormat, this.EXTERNAL_BUFFER_SIZE);
+	   // dataLine.open(audioFormat, this.EXTERNAL_BUFFER_SIZE);
+		dataLine.open(audioFormat, byteRate);
 	} catch (LineUnavailableException e1) {
 	    throw new PlayWaveException(e1);
 	}
@@ -66,7 +72,8 @@ public class PlaySound {
 	dataLine.start();
 
 	int readBytes = 0;
-	byte[] audioBuffer = new byte[this.EXTERNAL_BUFFER_SIZE];
+	//byte[] audioBuffer = new byte[this.EXTERNAL_BUFFER_SIZE];
+	byte[] audioBuffer = new byte[byteRate];
 
 	try {
 	    while (readBytes != -1) {
