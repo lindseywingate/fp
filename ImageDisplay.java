@@ -1,4 +1,5 @@
 
+import java.awt.event.ActionEvent;
 import java.awt.image.*;
 import java.io.*;
 import javax.swing.*;
@@ -19,7 +20,7 @@ public class ImageDisplay {
 	int width = 480; // default image width and height
 	int height = 270;
 	ArrayList<BufferedImage> frames = new ArrayList<BufferedImage>();
-
+	boolean playing;
 	//6291456 - bytes in each frame
 	//9000 frames in video
 
@@ -85,6 +86,16 @@ public class ImageDisplay {
 		}
 	}
 
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == playButton && playing == true)
+		{
+			//pause
+		}
+		else if (playing == false) {
+			//clear
+		}
+	}
+
 	public void showIms(String[] args) throws InterruptedException {
 		imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		readImageRGB(width, height, args[0], imgOne);
@@ -92,7 +103,10 @@ public class ImageDisplay {
 	public void runFrames() throws InterruptedException {
 		System.out.println("video");
 		frame = new JFrame();
+		JButton playButton = new JButton("Click Here");
+		playButton.addActionListener(this);
 		frame.add(new JLabel(new ImageIcon(imgOne)));
+		frame.add(playButton);
 		frame.setLocationRelativeTo(null);
 		frame.pack();
 		frame.setVisible(true);
