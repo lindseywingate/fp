@@ -20,7 +20,9 @@ public class ImageDisplay {
 	int width = 480; // default image width and height
 	int height = 270;
 	ArrayList<BufferedImage> frames = new ArrayList<BufferedImage>();
-	boolean playing;
+	static boolean playing;
+	JButton playButton = new JButton("Click Here");
+
 	//6291456 - bytes in each frame
 	//9000 frames in video
 
@@ -87,6 +89,7 @@ public class ImageDisplay {
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		//if playbutton clicked and playing is true
 		if(e.getSource() == playButton && playing == true)
 		{
 			//pause
@@ -100,13 +103,17 @@ public class ImageDisplay {
 		imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		readImageRGB(width, height, args[0], imgOne);
 	}
+
+//https://www.macs.hw.ac.uk/cs/java-swing-guidebook/?name=JButton&page=2#:~:text=Event%20Listeners%20are%20the%20things,the%20occurrence%20of%20the%20event.
 	public void runFrames() throws InterruptedException {
 		System.out.println("video");
 		frame = new JFrame();
-		JButton playButton = new JButton("Click Here");
+		JButton playButton = new JButton("> ||");
 		playButton.addActionListener(this);
+
 		frame.add(new JLabel(new ImageIcon(imgOne)));
 		frame.add(playButton);
+
 		frame.setLocationRelativeTo(null);
 		frame.pack();
 		frame.setVisible(true);
@@ -129,8 +136,9 @@ public class ImageDisplay {
 			@Override
 			public Void call() throws Exception
 			{
-				ren.runFrames();
-
+				if(playing) {
+					ren.runFrames();
+				}
 				return null;
 			}
 		};
@@ -139,7 +147,9 @@ public class ImageDisplay {
 			@Override
 			public Void call() throws Exception
 			{
-				PlayWaveFile.main(args);
+				if(playing) {
+					PlayWaveFile.main(args);
+				}
 
 				return null;
 			}
