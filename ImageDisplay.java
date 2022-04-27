@@ -1,4 +1,3 @@
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.*;
@@ -9,7 +8,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import threads.PausableScheduledThreadPoolExecutor;
+import threads.PausableExecutor;
 import  org.wikijava.sound.playWave.*;
 
 
@@ -21,8 +23,12 @@ public class ImageDisplay {
 	int width = 480; // default image width and height
 	int height = 270;
 	ArrayList<BufferedImage> frames = new ArrayList<BufferedImage>();
-	static boolean playing;
-	JButton playButton = new JButton("Click Here");
+	static boolean playing =true;
+	JButton playButton = new JButton("> ||");
+	Callable<Void> c1;
+	Callable<Void> c2;
+	PausableScheduledThreadPoolExecutor p1;
+	List<Future<Void>> f;
 
 	//6291456 - bytes in each frame
 	//9000 frames in video
@@ -109,24 +115,47 @@ public class ImageDisplay {
 	public void runFrames() throws InterruptedException {
 		System.out.println("video");
 		frame = new JFrame();
-		JButton playButton = new JButton("> ||");
+		frame.setSize(500,500);
+//		frame.setLayout(new BoxLayout(frame, BoxLayout.Y_AXIS));
+		//JButton playButton = new JButton("> ||");
 		playButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println("pressed");
+				if(playing) {
+					playing = false;
+				try {
+					synchronized (c1){
+
+						c1.wait();
+					}
+
+				} catch (InterruptedException ex) {
+					ex.printStackTrace();
+				}
+
+
+				}
+				else {
+					playing = true;
+					c1.notify();
+
+				}
 			}
 		});
-
-		frame.add(new JLabel(new ImageIcon(imgOne)));
-		frame.add(playButton);
+		playButton.setLocation(275, 500);
+		playButton.setSize(40, 30);
+		JLabel label = new JLabel(new ImageIcon(imgOne));
+		frame.add(label);
+		frame.getContentPane().add(playButton);
 
 		frame.setLocationRelativeTo(null);
 		frame.pack();
 		frame.setVisible(true);
 
 		for(int n=0; n<frames.size(); n++) {
-			frame.getContentPane().removeAll();
-			frame.add(new JLabel(new ImageIcon(frames.get(n))));
+			frame.getContentPane().remove(label);
+			label = new JLabel(new ImageIcon(frames.get(n)));
+			frame.add(label);
 			frame.invalidate();
 			frame.validate();
 			frame.repaint();
@@ -137,34 +166,37 @@ public class ImageDisplay {
 	public static void main(String[] args) throws InterruptedException {
 		ImageDisplay ren = new ImageDisplay();
 		ren.showIms(args);
-		Callable<Void> callable1 = new Callable<Void>()
+		ren.c1 = new Callable<Void>()
 		{
 			@Override
 			public Void call() throws Exception
 			{
-				if(playing) {
+
 					ren.runFrames();
-				}
+
 				return null;
 			}
 		};
-		Callable<Void> callable2 = new Callable<Void>()
+		ren.c2 = new Callable<Void>()
 		{
 			@Override
 			public Void call() throws Exception
 			{
-				if(playing) {
+
 					PlayWaveFile.main(args);
-				}
+
 
 				return null;
 			}
 		};
 		List<Callable<Void>> taskList = new ArrayList<>();
-		taskList.add(callable1);
-		taskList.add(callable2);
-		ExecutorService executor = Executors.newFixedThreadPool(3);
-		executor.invokeAll(taskList);
+		taskList.add(ren.c1);
+		taskList.add(ren.c2);
+		ren.p1 = new PausableScheduledThreadPoolExecutor(3);
+
+
+		ren.f = ren.p1.invokeAll(taskList);
+		ren.p1.shutdown();
 	}
 
 }
