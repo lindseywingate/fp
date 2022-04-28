@@ -29,6 +29,7 @@ public class ImageDisplay {
 	Callable<Void> c2;
 	PausableScheduledThreadPoolExecutor p1;
 	List<Future<Void>> f;
+	PlaySound playSound;
 
 	//6291456 - bytes in each frame
 	//9000 frames in video
@@ -123,21 +124,23 @@ public class ImageDisplay {
 			public void actionPerformed(ActionEvent e) {
 				if(playing) {
 					playing = false;
-				try {
-					synchronized (c1){
-
-						c1.wait();
-					}
-
-				} catch (InterruptedException ex) {
-					ex.printStackTrace();
-				}
+					playSound.pause();
+//				try {
+//					synchronized (c1){
+//
+//						c1.wait();
+//					}
+//
+//				} catch (InterruptedException ex) {
+//					ex.printStackTrace();
+//				}
 
 
 				}
 				else {
 					playing = true;
-					c1.notify();
+					playSound.resume();
+//					c1.notify();
 
 				}
 			}
@@ -152,14 +155,22 @@ public class ImageDisplay {
 		frame.pack();
 		frame.setVisible(true);
 
-		for(int n=0; n<frames.size(); n++) {
-			frame.getContentPane().remove(label);
-			label = new JLabel(new ImageIcon(frames.get(n)));
-			frame.add(label);
-			frame.invalidate();
-			frame.validate();
-			frame.repaint();
-			Thread.sleep(32,333333);
+		for(int n=0; n<frames.size();) {
+			if(playing) {
+				frame.getContentPane().remove(label);
+				label = new JLabel(new ImageIcon(frames.get(n)));
+				frame.add(label);
+				frame.invalidate();
+				frame.validate();
+				frame.repaint();
+				Thread.sleep(32, 333333);
+				n++;
+				//System.out.println("playing");
+			}
+			else{
+				System.out.println("pause");
+				continue;
+			}
 		}
 	}
 
@@ -183,7 +194,28 @@ public class ImageDisplay {
 			public Void call() throws Exception
 			{
 
-					PlayWaveFile.main(args);
+				String filename = args[1];
+
+				// opens the inputStream
+				FileInputStream inputStream = null;
+				try {
+					inputStream = new FileInputStream(filename);
+					//inputStream = this.getClass().getResourceAsStream(filename);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+
+				}
+
+				// initializes the playSound Object
+				ren.playSound = new PlaySound(inputStream);
+
+				// plays the sound
+				try {
+					ren.playSound.play();
+				} catch (PlayWaveException e) {
+					e.printStackTrace();
+
+				}
 
 
 				return null;
