@@ -26,6 +26,7 @@ import javax.sound.sampled.DataLine.Info;
 public class PlaySound {
 
     private InputStream waveStream;
+	public boolean playing = true;
 
     private final int EXTERNAL_BUFFER_SIZE = 524288; // 128Kb
 
@@ -85,41 +86,45 @@ public class PlaySound {
 
 	try {
 	    while (readBytes != -1) {
-		readBytes = audioInputStream.read(audioBuffer, 0,
-			audioBuffer.length);
-
+		if(playing) {
+			readBytes = audioInputStream.read(audioBuffer, 0,
+					audioBuffer.length);
 
 
 			double amplitude = 0;
-			for (int i = 0; i < audioBuffer.length/2; i++) {
-				double y = (audioBuffer[i*2] | audioBuffer[i*2+1] << 8) / 32768.0;
+			for (int i = 0; i < audioBuffer.length / 2; i++) {
+				double y = (audioBuffer[i * 2] | audioBuffer[i * 2 + 1] << 8) / 32768.0;
 				// depending on your endianness:
 				//double y = (audioBuffer[i*2]<<8 | audioBuffer[i*2+1]) / 32768.0;
 				amplitude += Math.abs(y);
 			}
 			amplitude = amplitude / audioBuffer.length / 2;
 			System.out.println(amplitude);
-		if (readBytes >= 0){
-			byte[] clone = audioBuffer.clone();
-			//Arrays.sort(clone);
-			//System.out.println(audioBuffer[clone.length-1]);
-			byte temp = clone[0];
-			byte  end = clone[clone.length-1];
-			clone[clone.length-1] = temp;
-			clone[0] = end;
+			if (readBytes >= 0) {
+				byte[] clone = audioBuffer.clone();
+				//Arrays.sort(clone);
+				//System.out.println(audioBuffer[clone.length-1]);
+				byte temp = clone[0];
+				byte end = clone[clone.length - 1];
+				clone[clone.length - 1] = temp;
+				clone[0] = end;
 
-			if(  count >80 && count < 95){
-				readBytes2 = audioInputStream2.read(audioBuffer2, 0,
-						audioBuffer2.length);
-				dataLine.write(audioBuffer2, 0, readBytes2);
+				if (count > 80 && count < 95) {
+					readBytes2 = audioInputStream2.read(audioBuffer2, 0,
+							audioBuffer2.length);
+					dataLine.write(audioBuffer2, 0, readBytes2);
+
+				} else {
+					dataLine.write(audioBuffer, 0, readBytes);
+				}
+				System.out.println(count + " s");
+				count++;
 
 			}
-			else{
-				dataLine.write(audioBuffer, 0, readBytes);
-			}
-			System.out.println(count + " s");
-			count++;
-
+		}
+		else{
+			System.out.println("sound paused");
+			continue;
 		}
 	    }
 	} catch (IOException e1) {
@@ -131,4 +136,10 @@ public class PlaySound {
 	}
 
     }
+	public void pause(){
+		playing = false;
+	}
+	public void resume(){
+		playing = true;
+	}
 }
