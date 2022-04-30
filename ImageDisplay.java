@@ -92,6 +92,7 @@ public class ImageDisplay {
 		//if playbutton clicked and playing is true
 		if(e.getSource() == playButton && playing == true)
 		{
+			//Thread.timeout();
 			//pause
 		}
 		else if (playing == false) {
@@ -156,7 +157,7 @@ public class ImageDisplay {
 		};
 		List<Callable<Void>> taskList = new ArrayList<>();
 		taskList.add(callable1);
-		taskList.add(callable2);
+		//taskList.add(callable2);
 		ExecutorService executor = Executors.newFixedThreadPool(3);
 		executor.invokeAll(taskList);
 	}
