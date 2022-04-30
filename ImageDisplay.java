@@ -1,4 +1,5 @@
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.*;
 import java.io.*;
 import javax.swing.*;
@@ -7,8 +8,12 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import threads.PausableScheduledThreadPoolExecutor;
+import threads.PausableExecutor;
 import  org.wikijava.sound.playWave.*;
+
 
 public class ImageDisplay {
 
@@ -18,16 +23,16 @@ public class ImageDisplay {
 	int width = 480; // default image width and height
 	int height = 270;
 	ArrayList<BufferedImage> frames = new ArrayList<BufferedImage>();
+	static boolean playing =true;
+	JButton playButton = new JButton("> ||");
+	Callable<Void> c1;
+	Callable<Void> c2;
+	PausableScheduledThreadPoolExecutor p1;
+	List<Future<Void>> f;
+	PlaySound playSound;
 
 	//6291456 - bytes in each frame
-	//9000 frames in vieo
-
-	static BufferedImage deepCopy(BufferedImage bi) {
-		ColorModel cm = bi.getColorModel();
-		boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
-		WritableRaster raster = bi.copyData(null);
-		return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
-	}
+	//9000 frames in video
 
 	/** Read Image RGB
 	 *  Reads the image of given width and height at the given imgPath into the provided BufferedImage.
@@ -54,12 +59,6 @@ public class ImageDisplay {
 
 			long sizeOfFile = rgbFile.length();
 			System.out.println("size of file length "+sizeOfFile);
-//			frame = new JFrame();
-//			//JFrame frame = new JFrame(getClass().getSimpleName());
-//			frame.add(new JLabel(new ImageIcon(img)));
-//			frame.setLocationRelativeTo(null);
-//			frame.pack();
-//			frame.setVisible(true);
 			long startTime = System.nanoTime();
 			for(long k = 0; k<sizeOfFile; k += frameLength) {
 				raf.seek(k);
@@ -73,126 +72,163 @@ public class ImageDisplay {
 						byte a = 0;
 						byte r = bytes[ind];
 						byte g = bytes[ind+height*width];
-						byte b = bytes[ind+height*width*2]; 
-	
+						byte b = bytes[ind+height*width*2];
+
 						int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
-						//int pix = ((a << 24) + (r << 16) + (g << 8) + b);
 						img.setRGB(x,y,pix);
 						ind++;
-						//System.out.println("INDEX "+ind); //262144
 					}
 				}
-//				frame.getContentPane().removeAll();
-//				frame.add(new JLabel(new ImageIcon(img)));
-//				frame.invalidate();
-//				frame.validate();
-//				frame.repaint();
-//				Thread.sleep(1);
-				//add image to the array
 				frames.add(img);
-				//clear image? and start a new one
 			}
 			long endTime = System.nanoTime();
 			long timeElapsed = endTime - startTime;
 			System.out.println("Execution time in nanoseconds: " + timeElapsed);
 			System.out.println("Execution time in milliseconds: " + timeElapsed / 1000000);
-//			long totMin = 300;
-//			long diff = totMin/(timeElapsed/1000);
-//			System.out.println(diff);
 		}
-		catch (FileNotFoundException e) 
+		catch (FileNotFoundException e)
 		{
 			e.printStackTrace();
-		} 
+		}
 		catch (IOException e /*| InterruptedException e*/)
 		{
 			e.printStackTrace();
 		}
 	}
 
+	public void actionPerformed(ActionEvent e) {
+		//if playbutton clicked and playing is true
+		if(e.getSource() == playButton && playing == true)
+		{
+			//pause
+		}
+		else if (playing == false) {
+			//clear
+		}
+	}
+
 	public void showIms(String[] args) throws InterruptedException {
-
-		// Read a parameter from command line
-		//String param1 = args[1];
-		//System.out.println("The second parameter was: " + param1);
-
-		// Read in the specified image
-		//File file = new File(".");
-		//for(String fileNames : file.list()) System.out.println(fileNames);
 		imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		readImageRGB(width, height, args[0], imgOne);
-
-
-
-		// Use label to display the image
-		// GridBagLayout gLayout = new GridBagLayout();
-		// frame.getContentPane().setLayout(gLayout);
-
-		// lbIm1 = new JLabel(new ImageIcon(imgOne));
-
-		// GridBagConstraints c = new GridBagConstraints();
-		// c.fill = GridBagConstraints.HORIZONTAL;
-		// c.anchor = GridBagConstraints.CENTER;
-		// c.weightx = 0.5;
-		// c.gridx = 0;
-		// c.gridy = 0;
-
-		// c.fill = GridBagConstraints.HORIZONTAL;
-		// c.gridx = 0;
-		// c.gridy = 1;
-		// frame.getContentPane().add(lbIm1, c);
-
-		// frame.pack();
-
 	}
+
+	//https://www.macs.hw.ac.uk/cs/java-swing-guidebook/?name=JButton&page=2#:~:text=Event%20Listeners%20are%20the%20things,the%20occurrence%20of%20the%20event.
 	public void runFrames() throws InterruptedException {
 		System.out.println("video");
 		frame = new JFrame();
-		//JFrame frame = new JFrame(getClass().getSimpleName());
-		frame.add(new JLabel(new ImageIcon(imgOne)));
+		frame.setSize(500,500);
+//		frame.setLayout(new BoxLayout(frame, BoxLayout.Y_AXIS));
+		//JButton playButton = new JButton("> ||");
+		playButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(playing) {
+					playing = false;
+					playSound.pause();
+//				try {
+//					synchronized (c1){
+//
+//						c1.wait();
+//					}
+//
+//				} catch (InterruptedException ex) {
+//					ex.printStackTrace();
+//				}
+
+
+				}
+				else {
+					playing = true;
+					playSound.resume();
+//					c1.notify();
+
+				}
+			}
+		});
+		playButton.setLocation(275, 500);
+		playButton.setSize(40, 30);
+		JLabel label = new JLabel(new ImageIcon(imgOne));
+		frame.add(label);
+		frame.getContentPane().add(playButton);
+
 		frame.setLocationRelativeTo(null);
 		frame.pack();
 		frame.setVisible(true);
 
-		for(int n=0; n<frames.size(); n++) {
-			frame.getContentPane().removeAll();
-			frame.add(new JLabel(new ImageIcon(frames.get(n))));
-			frame.invalidate();
-			frame.validate();
-			frame.repaint();
-			Thread.sleep(32,333333);
+		for(int n=0; n<frames.size();) {
+			if(playing) {
+				frame.getContentPane().remove(label);
+				label = new JLabel(new ImageIcon(frames.get(n)));
+				frame.add(label);
+				frame.invalidate();
+				frame.validate();
+				frame.repaint();
+				Thread.sleep(32, 333333);
+				n++;
+				//System.out.println("playing");
+			}
+			else{
+				System.out.println("pause");
+				continue;
+			}
 		}
 	}
 
 	public static void main(String[] args) throws InterruptedException {
 		ImageDisplay ren = new ImageDisplay();
 		ren.showIms(args);
-		Callable<Void> callable1 = new Callable<Void>()
+		ren.c1 = new Callable<Void>()
 		{
 			@Override
 			public Void call() throws Exception
 			{
-				ren.runFrames();
+
+					ren.runFrames();
 
 				return null;
 			}
 		};
-		Callable<Void> callable2 = new Callable<Void>()
+		ren.c2 = new Callable<Void>()
 		{
 			@Override
 			public Void call() throws Exception
 			{
-				PlayWaveFile.main(args);
+
+				String filename = args[1];
+
+				// opens the inputStream
+				FileInputStream inputStream = null;
+				try {
+					inputStream = new FileInputStream(filename);
+					//inputStream = this.getClass().getResourceAsStream(filename);
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+
+				}
+
+				// initializes the playSound Object
+				ren.playSound = new PlaySound(inputStream);
+
+				// plays the sound
+				try {
+					ren.playSound.play();
+				} catch (PlayWaveException e) {
+					e.printStackTrace();
+
+				}
+
 
 				return null;
 			}
 		};
 		List<Callable<Void>> taskList = new ArrayList<>();
-		taskList.add(callable1);
-		taskList.add(callable2);
-		ExecutorService executor = Executors.newFixedThreadPool(3);
-		executor.invokeAll(taskList);
-		//PlayWaveFile.main(args);
+		taskList.add(ren.c1);
+		taskList.add(ren.c2);
+		ren.p1 = new PausableScheduledThreadPoolExecutor(3);
+
+
+		ren.f = ren.p1.invokeAll(taskList);
+		ren.p1.shutdown();
 	}
 
 }
