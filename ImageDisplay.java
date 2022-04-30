@@ -174,7 +174,18 @@ public class ImageDisplay {
 		}
 	}
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws InterruptedException, IOException {
+		Process p = Runtime.getRuntime().exec("python Part_2.py");
+		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+		System.out.println(in.readLine());
+		File file = new File(".");
+		File [] files = file.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith(".avi");
+			}
+		});
+
 		ImageDisplay ren = new ImageDisplay();
 		ren.showIms(args);
 		ren.c1 = new Callable<Void>()
