@@ -63,7 +63,7 @@ public class PlaySound {
 	int channel = audioFormat.getChannels();
 	int bitRate = (int) sample*bitDepth*channel;
 	int byteRate = bitRate/8;
-	int framelength = byteRate/30;
+	int framelength = byteRate;
 
 	// opens the audio channel
 	SourceDataLine dataLine = null;

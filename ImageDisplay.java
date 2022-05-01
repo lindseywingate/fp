@@ -11,6 +11,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.opencv.calib3d.Calib3d;
+import org.opencv.*;
+import org.opencv.core.CvType;
+import org.opencv.features2d.Feature2D;
+import org.opencv.features2d.Features2d;
+import org.opencv.imgproc.Imgproc;
 import threads.PausableScheduledThreadPoolExecutor;
 import threads.PausableExecutor;
 import  org.wikijava.sound.playWave.*;
@@ -171,7 +176,7 @@ public class ImageDisplay {
 				return name.endsWith(".avi");
 			}
 		});*/
-
+		
 		ImageDisplay ren = new ImageDisplay();
 		ren.showIms(args);
 		ren.c1 = new Callable<Void>()
@@ -226,6 +231,7 @@ public class ImageDisplay {
 
 		ren.f = ren.p1.invokeAll(taskList);
 		ren.p1.shutdown();
+
 	}
 
 }
