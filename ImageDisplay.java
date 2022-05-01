@@ -96,16 +96,7 @@ public class ImageDisplay {
 		}
 	}
 
-	public void actionPerformed(ActionEvent e) {
-		//if playbutton clicked and playing is true
-		if(e.getSource() == playButton && playing == true)
-		{
-			//pause
-		}
-		else if (playing == false) {
-			//clear
-		}
-	}
+
 
 	public void showIms(String[] args) throws InterruptedException {
 		imgOne = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -119,28 +110,22 @@ public class ImageDisplay {
 		frame.setSize(500,500);
 //		frame.setLayout(new BoxLayout(frame, BoxLayout.Y_AXIS));
 		//JButton playButton = new JButton("> ||");
+
+		// Listener for play/pause button
 		playButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if(playing) {
 					playing = false;
 					playSound.pause();
-//				try {
-//					synchronized (c1){
 //
-//						c1.wait();
-//					}
-//
-//				} catch (InterruptedException ex) {
-//					ex.printStackTrace();
-//				}
 
 
 				}
 				else {
 					playing = true;
 					playSound.resume();
-//					c1.notify();
+//
 
 				}
 			}
@@ -154,7 +139,7 @@ public class ImageDisplay {
 		frame.setLocationRelativeTo(null);
 		frame.pack();
 		frame.setVisible(true);
-
+		System.out.println(frames.size());
 		for(int n=0; n<frames.size();) {
 			if(playing) {
 				frame.getContentPane().remove(label);
@@ -175,7 +160,7 @@ public class ImageDisplay {
 	}
 
 	public static void main(String[] args) throws InterruptedException, IOException {
-		Process p = Runtime.getRuntime().exec("python Part_2.py");
+		/*Process p = Runtime.getRuntime().exec("python Part_2.py");
 		BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
 		System.out.println(in.readLine());
 		File file = new File(".");
@@ -184,7 +169,7 @@ public class ImageDisplay {
 			public boolean accept(File dir, String name) {
 				return name.endsWith(".avi");
 			}
-		});
+		});*/
 
 		ImageDisplay ren = new ImageDisplay();
 		ren.showIms(args);

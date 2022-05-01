@@ -63,6 +63,7 @@ public class PlaySound {
 	int channel = audioFormat.getChannels();
 	int bitRate = (int) sample*bitDepth*channel;
 	int byteRate = bitRate/8;
+	int framelength = byteRate/30;
 
 	// opens the audio channel
 	SourceDataLine dataLine = null;
@@ -80,8 +81,8 @@ public class PlaySound {
 	int readBytes = 0;
 	int readBytes2 =0;
 	//byte[] audioBuffer = new byte[this.EXTERNAL_BUFFER_SIZE];
-	byte[] audioBuffer = new byte[byteRate];
-	byte[] audioBuffer2 = new byte[byteRate];
+	byte[] audioBuffer = new byte[framelength];
+	byte[] audioBuffer2 = new byte[framelength];
 		int count = 0;
 
 	try {
@@ -99,7 +100,7 @@ public class PlaySound {
 				amplitude += Math.abs(y);
 			}
 			amplitude = amplitude / audioBuffer.length / 2;
-			System.out.println(amplitude);
+			//System.out.println(amplitude);
 			if (readBytes >= 0) {
 				byte[] clone = audioBuffer.clone();
 				//Arrays.sort(clone);
