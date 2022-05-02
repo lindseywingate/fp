@@ -3,12 +3,7 @@ package org.wikijava.sound.playWave;
 
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -40,7 +35,7 @@ public class PlaySound {
     }
 
     public void play() throws PlayWaveException, IOException {
-		HashMap<String,Integer> adFrame = new HashMap<>();
+		HashMap<String,Integer> adFrame = new LinkedHashMap<>();
 		BufferedReader br = new BufferedReader(new FileReader("ad_times.txt"));
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -48,7 +43,7 @@ public class PlaySound {
 
 			while (line != null) {
 				String[] adTime = line.split(" ");
-				adFrame.put(adTime[0], Integer.parseInt(adTime[1]));
+				adFrame.put(adTime[0], Integer.parseInt(adTime[1])/30);
 				sb.append(line);
 				sb.append(System.lineSeparator());
 				line = br.readLine();
@@ -115,7 +110,10 @@ public class PlaySound {
 	byte[] audioBuffer = new byte[framelength];
 	byte[] audioBuffer2 = new byte[framelength];
 		int count = 0;
-
+		Iterator<Map.Entry<String,Integer>> adIterator = adFrame.entrySet().iterator();
+		Iterator<AudioInputStream> audioIterator = audioList.iterator();
+		AudioInputStream adAudio = audioIterator.next();
+		Map.Entry<String,Integer> adTime = adIterator.next();
 	try {
 	    while (readBytes != -1) {
 		if(playing) {
@@ -124,6 +122,7 @@ public class PlaySound {
 
 
 			double amplitude = 0;
+
 			for (int i = 0; i < audioBuffer.length / 2; i++) {
 				double y = (audioBuffer[i * 2] | audioBuffer[i * 2 + 1] << 8) / 32768.0;
 				// depending on your endianness:
@@ -141,12 +140,21 @@ public class PlaySound {
 				clone[clone.length - 1] = temp;
 				clone[0] = end;
 
-				if (count > 80 && count < 95) {
-					readBytes2 = audioInputStream2.read(audioBuffer2, 0,
+				if ((count >= adTime.getValue() && count < adTime.getValue() + 15) ) {
+
+					readBytes2 = adAudio.read(audioBuffer2, 0,
 							audioBuffer2.length);
+					System.out.println(readBytes2);
 					dataLine.write(audioBuffer2, 0, readBytes2);
+					if(count == adTime.getValue() + 14){
+						if(adIterator.hasNext()){
+							adTime = adIterator.next();
+							adAudio = audioIterator.next();
+						}
+					}
 
 				} else {
+
 					dataLine.write(audioBuffer, 0, readBytes);
 				}
 				System.out.println(count + " s");
