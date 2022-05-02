@@ -2,11 +2,13 @@ package org.wikijava.sound.playWave;
 
 
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -37,11 +39,40 @@ public class PlaySound {
 	this.waveStream = waveStream;
     }
 
-    public void play() throws PlayWaveException {
+    public void play() throws PlayWaveException, IOException {
+		HashMap<String,Integer> adFrame = new HashMap<>();
+		BufferedReader br = new BufferedReader(new FileReader("ad_times.txt"));
+		try {
+			StringBuilder sb = new StringBuilder();
+			String line = br.readLine();
+
+			while (line != null) {
+				String[] adTime = line.split(" ");
+				adFrame.put(adTime[0], Integer.parseInt(adTime[1]));
+				sb.append(line);
+				sb.append(System.lineSeparator());
+				line = br.readLine();
+			}
+			String everything = sb.toString();
+			System.out.println(everything);
+		} finally {
+			br.close();
+		}
+
+
 
 	AudioInputStream audioInputStream = null;
 		AudioInputStream audioInputStream2 = null;
+		ArrayList<AudioInputStream> audioList = new ArrayList<>();
 	try {
+		File f = new File("dataset/Ads/");
+
+		for (Map.Entry<String,Integer> entry:
+				adFrame.entrySet()) {
+			File[] files = f.listFiles((dir1, name) -> name.startsWith(entry.getKey()) && name.endsWith(".wav"));
+			InputStream I = new BufferedInputStream(new FileInputStream(files[0]));
+			audioList.add(AudioSystem.getAudioInputStream(I));
+		}
 	    //audioInputStream = AudioSystem.getAudioInputStream(this.waveStream);
 		
 		//add buffer for mark/reset support, modified by Jian
