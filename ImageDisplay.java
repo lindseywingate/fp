@@ -156,7 +156,7 @@ public class ImageDisplay {
 				frame.invalidate();
 				frame.validate();
 				frame.repaint();
-				Thread.sleep(32, 333333);
+				Thread.sleep(32, 498333);
 				n++;
 				//System.out.println("playing");
 			}

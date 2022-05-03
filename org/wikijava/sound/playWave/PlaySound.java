@@ -45,7 +45,7 @@ public class PlaySound {
 
 			while (line != null) {
 				String[] adTime = line.split(" ");
-				adFrame.put(adTime[0], Integer.parseInt(adTime[1])/30);
+				adFrame.put(adTime[0], Integer.parseInt(adTime[1]));
 				sb.append(line);
 				sb.append(System.lineSeparator());
 				line = br.readLine();
@@ -94,7 +94,7 @@ public class PlaySound {
 	int bitRate = (int) sample*bitDepth*channel;
 	int byteRate = bitRate/8;
 
-	int framelength = byteRate;
+	int framelength = byteRate/30;
 
 
 	// opens the audio channel
@@ -102,7 +102,7 @@ public class PlaySound {
 	try {
 	    dataLine = (SourceDataLine) AudioSystem.getLine(info);
 	   // dataLine.open(audioFormat, this.EXTERNAL_BUFFER_SIZE);
-		dataLine.open(audioFormat, byteRate);
+		dataLine.open(audioFormat, framelength);
 	} catch (LineUnavailableException e1) {
 	    throw new PlayWaveException(e1);
 	}
@@ -149,13 +149,13 @@ public class PlaySound {
 				clone[clone.length - 1] = temp;
 				clone[0] = end;
 
-				if ((count >= adTime.getValue() && count < adTime.getValue() + 15) ) {
+				if ((count >= adTime.getValue() && count < adTime.getValue() + 15*30) ) {
 
 					readBytes2 = adAudio.read(audioBuffer2, 0,
 							audioBuffer2.length);
 					System.out.println(readBytes2);
 					dataLine.write(audioBuffer2, 0, readBytes2);
-					if(count == adTime.getValue() + 14){
+					if(count == adTime.getValue() + 14*30){
 						if(adIterator.hasNext()){
 							adTime = adIterator.next();
 							adAudio = audioIterator.next();
