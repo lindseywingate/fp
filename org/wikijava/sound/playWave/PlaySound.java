@@ -2,8 +2,10 @@ package org.wikijava.sound.playWave;
 
 
 
+
 import java.io.*;
 import java.util.*;
+
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -58,7 +60,9 @@ public class PlaySound {
 
 	AudioInputStream audioInputStream = null;
 		AudioInputStream audioInputStream2 = null;
+
 		ArrayList<AudioInputStream> audioList = new ArrayList<>();
+
 	try {
 		File f = new File("dataset/Ads/");
 
@@ -89,7 +93,9 @@ public class PlaySound {
 	int channel = audioFormat.getChannels();
 	int bitRate = (int) sample*bitDepth*channel;
 	int byteRate = bitRate/8;
+
 	int framelength = byteRate;
+
 
 	// opens the audio channel
 	SourceDataLine dataLine = null;
@@ -107,6 +113,7 @@ public class PlaySound {
 	int readBytes = 0;
 	int readBytes2 =0;
 	//byte[] audioBuffer = new byte[this.EXTERNAL_BUFFER_SIZE];
+
 	byte[] audioBuffer = new byte[framelength];
 	byte[] audioBuffer2 = new byte[framelength];
 		int count = 0;
@@ -125,11 +132,13 @@ public class PlaySound {
 
 			for (int i = 0; i < audioBuffer.length / 2; i++) {
 				double y = (audioBuffer[i * 2] | audioBuffer[i * 2 + 1] << 8) / 32768.0;
+
 				// depending on your endianness:
 				//double y = (audioBuffer[i*2]<<8 | audioBuffer[i*2+1]) / 32768.0;
 				amplitude += Math.abs(y);
 			}
 			amplitude = amplitude / audioBuffer.length / 2;
+
 			//System.out.println(amplitude);
 			if (readBytes >= 0) {
 				byte[] clone = audioBuffer.clone();
@@ -165,6 +174,7 @@ public class PlaySound {
 		else{
 			System.out.println("sound paused");
 			continue;
+
 		}
 	    }
 	} catch (IOException e1) {
