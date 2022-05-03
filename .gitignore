@@ -4,5 +4,11 @@ dataset/*
 pos/*
 data/*
 images_cut/*
+venv/*
+out
+images_cut/*
+threads/*
+fp.iml
+
 
 
