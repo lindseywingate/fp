@@ -33,6 +33,7 @@ public class ImageDisplay {
 	ArrayList<BufferedImage> frames = new ArrayList<BufferedImage>();
 	static boolean playing =true;
 	JButton playButton = new JButton("> ||");
+	//JButton stopButton = new JButton("stop");
 	Callable<Void> c1;
 	Callable<Void> c2;
 	PausableScheduledThreadPoolExecutor p1;
