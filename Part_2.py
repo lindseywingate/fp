@@ -2,13 +2,14 @@
 # coding: utf-8
 
 # In[5]:
-
+import sys
 
 import cv2
 import numpy as np
 from PIL import Image
+from matplotlib import pyplot as plt
 
-
+print('argument list:', str(sys.argv))
 with open("dataset\Videos\data_test1.rgb", "rb") as f:
    v = np.fromfile(f, np.dtype('B'))
 
@@ -29,7 +30,7 @@ for frame_number in range(frct):
         final_frame = np.rot90(final_frame,3)
         final_frame = np.flip(final_frame,1)
         final_video.append(final_frame)
-
+#print(final_video)
 
 out = cv2.VideoWriter('video.avi', cv2.VideoWriter_fourcc(*'DIVX'), 30, (480, 270))
 

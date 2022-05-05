@@ -2,6 +2,7 @@ package org.wikijava.sound.playWave;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 /**
  * plays a wave file using PlaySound class
@@ -42,7 +43,7 @@ public class PlayWaveFile {
 	// plays the sound
 	try {
 	    playSound.play();
-	} catch (PlayWaveException e) {
+	} catch (PlayWaveException | IOException e) {
 	    e.printStackTrace();
 	    return;
 	}
